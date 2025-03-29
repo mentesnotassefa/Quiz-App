@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Category from "./pages/Category";
 import Quiz from "./pages/Quiz";
+import Result from "./pages/Result";
 
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
           <Route path="/quiz" element={<Quiz quizConfig={quizConfig} score={score} setScore={setScore} />} />
-          
+          <Route path="/result" element={<Result score={score} />} />
         </Routes>
       </div>
     </Router>
