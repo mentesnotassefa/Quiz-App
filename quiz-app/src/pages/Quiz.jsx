@@ -19,9 +19,9 @@ function Quiz({ quizConfig, score, setScore }) {
       try {
         const response = await axios.get("https://opentdb.com/api.php", {
           params: {
-            amount: quizConfig.amount,
+            amount: quizConfig.amount, // Uses selected amount
             category: categoryId,
-            difficulty: quizConfig.difficulty,
+            difficulty: quizConfig.difficulty, // Uses selected difficulty
             type: "multiple",
           },
         });
