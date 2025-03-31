@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function Quiz({ quizConfig, score, setScore }) {
+function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selectedAnswer, setSelectedAnswer] = useState(null); // Track selected answer
-  const [isCorrect, setIsCorrect] = useState(null); // Track if answer is correct
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [answeredQuestions, setAnsweredQuestions] = useState([]); // Track all answers
   const navigate = useNavigate();
 
   // Fetch questions from OpenTDB API
@@ -46,27 +47,44 @@ function Quiz({ quizConfig, score, setScore }) {
 
   // Handle answer selection
   const handleAnswer = (answer) => {
-    if (selectedAnswer) return; // Prevent multiple selections
+    if (selectedAnswer) return;
 
     setSelectedAnswer(answer);
     const correct = answer === questions[currentQuestion].correctAnswer;
     setIsCorrect(correct);
 
-    // Update score if correct
+    // Update score
     if (correct) {
       setScore(score + 1);
     }
 
-    // Move to next question or result after a delay
+    // Store question details
+    const questionData = {
+      question: questions[currentQuestion].question,
+      userAnswer: answer,
+      correctAnswer: questions[currentQuestion].correctAnswer,
+      isCorrect: correct,
+    };
+    setAnsweredQuestions((prev) => [...prev, questionData]);
+
+    // Move to next question or result after delay
     setTimeout(() => {
       if (currentQuestion + 1 < questions.length) {
         setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null); // Reset for next question
+        setSelectedAnswer(null);
         setIsCorrect(null);
       } else {
+        // Calculate summary and pass to App.jsx
+        const correctCount = answeredQuestions.filter((q) => q.isCorrect).length + (correct ? 1 : 0);
+        const incorrectCount = answeredQuestions.filter((q) => !q.isCorrect).length + (correct ? 0 : 1);
+        setQuizSummary({
+          correct: correctCount,
+          incorrect: incorrectCount,
+          questions: [...answeredQuestions, questionData], // Include all questions
+        });
         navigate("/result");
       }
-    }, 1500); // 1.5-second delay to show feedback
+    }, 1000);
   };
 
   if (loading) return <div className="text-center p-4">Loading...</div>;
@@ -91,17 +109,17 @@ function Quiz({ quizConfig, score, setScore }) {
             className={`w-full p-3 rounded-lg text-left ${
               selectedAnswer === opt
                 ? isCorrect
-                  ? "bg-blue-500 text-white"
+                  ? "bg-green-500 text-white"
                   : "bg-red-500 text-white"
                 : "bg-white shadow hover:bg-gray-100"
             }`}
-            disabled={selectedAnswer !== null} // Disable after selection
+            disabled={selectedAnswer !== null}
             dangerouslySetInnerHTML={{ __html: opt }}
           />
         ))}
       </div>
       {selectedAnswer && (
-        <p className={`mt-4 text-lg ${isCorrect ? "text-blue-600" : "text-red-600"}`}>
+        <p className={`mt-4 text-lg ${isCorrect ? "text-green-600" : "text-red-600"}`}>
           {isCorrect ? "Correct!" : "Incorrect!"} The correct answer was: "
           {questions[currentQuestion].correctAnswer}"
         </p>

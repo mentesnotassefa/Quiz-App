@@ -15,6 +15,7 @@ function App() {
     amount: 10,
   });
   const [score, setScore] = useState(0);
+  const [quizSummary, setQuizSummary] = useState({ correct: 0, incorrect: 0, questions: [] }); // Include questions
 
   return (
     <Router>
@@ -25,8 +26,18 @@ function App() {
           <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
           <Route path="/about" element={<About />} />
           <Route path="/settings" element={<Settings setQuizConfig={setQuizConfig} />} />
-          <Route path="/quiz" element={<Quiz quizConfig={quizConfig} score={score} setScore={setScore} />} />
-          <Route path="/result" element={<Result score={score} />} />
+          <Route
+            path="/quiz"
+            element={
+              <Quiz
+                quizConfig={quizConfig}
+                score={score}
+                setScore={setScore}
+                setQuizSummary={setQuizSummary}
+              />
+            }
+          />
+          <Route path="/result" element={<Result score={score} quizSummary={quizSummary} />} />
         </Routes>
       </div>
     </Router>
