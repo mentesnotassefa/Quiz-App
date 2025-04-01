@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Category from "./pages/Category";
 import About from "./pages/About";
-import Settings from "./pages/Settings";
+
 import Quiz from "./pages/Quiz";
 import Result from "./pages/Result";
 
@@ -25,7 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
           <Route path="/about" element={<About />} />
-          <Route path="/settings" element={<Settings setQuizConfig={setQuizConfig} />} />
+         
           <Route
             path="/quiz"
             element={

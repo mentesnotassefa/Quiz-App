@@ -21,7 +21,7 @@ function Navbar() {
           <Link to="/" className="text-white hover:text-gray-200">Home</Link>
           <Link to="/category" className="text-white hover:text-gray-200">Category</Link>
           <Link to="/about" className="text-white hover:text-gray-200">About</Link>
-          <Link to="/settings" className="text-white hover:text-gray-200">Settings</Link>
+          
         </div>
       </div>
     </nav>
