@@ -96,11 +96,11 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">{quizConfig.category} Quiz</h2>
-      <p className="text-lg mb-2">
+      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{quizConfig.category} Quiz</h2>
+      <p className="text-lg mb-2 text-gray-700 dark:text-gray-300">
         Question {currentQuestion + 1}/{questions.length} | Score: {score}
       </p>
-      <p className="mb-4 text-xl" dangerouslySetInnerHTML={{ __html: questions[currentQuestion].question }} />
+      <p className="mb-4 text-xl text-gray-900 dark:text-white" dangerouslySetInnerHTML={{ __html: questions[currentQuestion].question }} />
       <div className="space-y-2">
         {questions[currentQuestion].options.map((opt, idx) => (
           <button
@@ -111,7 +111,7 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
                 ? isCorrect
                   ? "bg-green-500 text-white"
                   : "bg-red-500 text-white"
-                : "bg-white shadow hover:bg-gray-100"
+                : "bg-white shadow hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             }`}
             disabled={selectedAnswer !== null}
             dangerouslySetInnerHTML={{ __html: opt }}
@@ -119,9 +119,8 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
         ))}
       </div>
       {selectedAnswer && (
-        <p className={`mt-4 text-lg ${isCorrect ? "text-green-600" : "text-red-600"}`}>
-          {isCorrect ? "Correct!" : "Incorrect!"} The correct answer was: "
-          {questions[currentQuestion].correctAnswer}"
+        <p className={`mt-4 text-lg ${isCorrect ? "text-green-600" : "text-red-600"} dark:${isCorrect ? "text-green-400" : "text-red-400"}`}>
+          {isCorrect ? "Correct!" : "Incorrect!"} The correct answer was: "{questions[currentQuestion].correctAnswer}"
         </p>
       )}
     </div>

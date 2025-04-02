@@ -18,23 +18,37 @@ function App() {
   const [score, setScore] = useState(0);
   const [quizSummary, setQuizSummary] = useState({ correct: 0, incorrect: 0, questions: [] });
   const [quizHistory, setQuizHistory] = useState(() => {
-    return JSON.parse(localStorage.getItem("quizHistory") || "[]"); // Initialize from localStorage
+    return JSON.parse(localStorage.getItem("quizHistory") || "[]");
+  });
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark"; // Load from localStorage
   });
 
-  // Sync quizHistory with localStorage changes
+  // Sync quizHistory with localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       const updatedHistory = JSON.parse(localStorage.getItem("quizHistory") || "[]");
       setQuizHistory(updatedHistory);
-      console.log("Loaded from localStorage in App:", updatedHistory); // Debug log
     };
-
-    // Load initial history and listen for changes
     handleStorageChange();
     window.addEventListener("storage", handleStorageChange);
-
-    return () => window.removeEventListener("storage", handleStorageChange); // Cleanup
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+
+  // Apply dark mode class and save preference
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
 
   const resetQuiz = () => {
     setScore(0);
@@ -43,13 +57,13 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
-        <Navbar />
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <Navbar toggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
           <Route path="/about" element={<About />} />
-         
+          
           <Route
             path="/quiz"
             element={
