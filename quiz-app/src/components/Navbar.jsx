@@ -6,7 +6,7 @@ function Navbar({ toggleDarkMode, isDarkMode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-blue-600 dark:bg-gray-800 p-4">
+    <nav className="bg-gray-600 dark:bg-gray-800 p-4">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo in Top-Left Corner */}
         <Link to="/">

@@ -100,7 +100,7 @@ function Category({ setQuizConfig }) {
       </div>
       <button
         onClick={handleStartQuiz}
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 w-full max-w-xs"
+        className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-500 dark:hover:bg-gray-900 w-full max-w-xs"
       >
         Start Quiz
       </button>

@@ -81,7 +81,7 @@ function History({ quizHistory }) {
 
       <Link
         to="/"
-        className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+        className="mt-6 inline-block bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-500 dark:hover:bg-gray-600"
       >
         Back to Home
       </Link>

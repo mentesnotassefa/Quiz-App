@@ -7,7 +7,7 @@ function Home() {
       <p className="text-lg mb-6 text-gray-700 dark:text-gray-300">Test your knowledge with fun quizzes!</p>
       <Link
         to="/category"
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 "
+        className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-900 "
       >
         Start Quiz
       </Link>
