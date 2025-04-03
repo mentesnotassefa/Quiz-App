@@ -8,6 +8,7 @@ import About from "./pages/About";
 import Quiz from "./pages/Quiz";
 import Result from "./pages/Result";
 import History from "./pages/History";
+import backgroundImage from "./assets/bac.png"; // Import the background image
 
 function App() {
   const [quizConfig, setQuizConfig] = useState({
@@ -21,10 +22,9 @@ function App() {
     return JSON.parse(localStorage.getItem("quizHistory") || "[]");
   });
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark"; // Load from localStorage
+    return localStorage.getItem("theme") === "dark";
   });
 
-  // Sync quizHistory with localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       const updatedHistory = JSON.parse(localStorage.getItem("quizHistory") || "[]");
@@ -35,7 +35,6 @@ function App() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // Apply dark mode class and save preference
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -57,13 +56,26 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <div
+        className="min-h-screen w-full text-gray-900 dark:text-gray-100"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover", // Ensures the image covers the entire area
+          backgroundPosition: "center", // Centers the image
+          backgroundAttachment: "fixed", // Keeps the background fixed while scrolling
+          backgroundRepeat: "no-repeat", // Prevents tiling
+          backgroundColor: isDarkMode ? "rgba(17, 24, 39, 0.8)" : "rgba(243, 244, 246, 0.8)", // Overlay for readability
+          backgroundBlendMode: "overlay", // Blends overlay with image
+          minHeight: "100vh", // Ensures it covers the full viewport height
+          position: "relative", // Ensures content can be positioned over it
+        }}
+      >
         <Navbar toggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
           <Route path="/about" element={<About />} />
-          
+        
           <Route
             path="/quiz"
             element={
