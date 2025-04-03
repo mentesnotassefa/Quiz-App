@@ -56,7 +56,7 @@ function Category({ setQuizConfig }) {
                 className={`p-4 rounded-lg shadow ${
                   selectedCategory === cat
                     ? "bg-blue-600 text-white"
-                    : "bg-white hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
+                    : "bg-white hover:animate-bounce delay-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
                 }`}
               >
                 {cat}
