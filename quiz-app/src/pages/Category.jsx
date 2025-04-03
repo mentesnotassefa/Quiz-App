@@ -10,7 +10,8 @@ function Category({ setQuizConfig }) {
 
   const categories = [
     "Biology", "Chemistry", "General Knowledge", "History",
-    "Mathematics", "Physics", "Social Science", "Science",
+    "Mathematics", "Physics", "Social Science", "Science","Computer","Politics","Music","Art",
+    "Sport","Vehicles", "Books", "Geography", "Comics", "Film"
   ];
   const amounts = [5, 10, 15, 20];
   const difficulties = ["easy", "medium", "hard"];

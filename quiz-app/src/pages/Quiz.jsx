@@ -16,6 +16,8 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
       const categoryMap = {
         Biology: 27, Chemistry: 27, "General Knowledge": 9, History: 23,
         Mathematics: 19, Physics: 27, "Social Science": 22, Science: 27,
+        Computer: 18, Politics:24, Music: 12, Art: 25, Sport: 21, Vehicles: 28,
+        Books: 10, Geography: 22, Comics: 29, Film: 11,
       };
       const categoryId = categoryMap[quizConfig.category] || 9;
 
