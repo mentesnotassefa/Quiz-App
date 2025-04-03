@@ -28,22 +28,22 @@ function Navbar({ toggleDarkMode, isDarkMode }) {
             isOpen ? "block" : "hidden"
           } md:flex items-center space-x-4 md:space-x-6`}
         >
-          <Link to="/" className="text-white hover:text-gray-200">
+          <Link to="/" className="text-white hover:text-gray-200 hover:animate-bounce">
             Home
           </Link>
-          <Link to="/category" className="text-white hover:text-gray-200">
+          <Link to="/category" className="text-white hover:text-gray-200 hover:animate-bounce">
             Category
           </Link>
-          <Link to="/about" className="text-white hover:text-gray-200">
+          <Link to="/about" className="text-white hover:text-gray-200 hover:animate-bounce">
             About
           </Link>
           
-          <Link to="/history" className="text-white hover:text-gray-200">
+          <Link to="/history" className="text-white hover:text-gray-200 hover:animate-bounce">
             History
           </Link>
           <button
             onClick={toggleDarkMode}
-            className="text-white hover:text-gray-200 focus:outline-none"
+            className="text-white hover:text-gray-200 hover:animate-bounce focus:outline-none"
             aria-label="Toggle dark mode"
           >
             {isDarkMode ? (
