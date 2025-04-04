@@ -13,6 +13,8 @@ function About() {
       <p className="mb-4">Challenge your knowledge with fun and interactive quizzes!</p>
       <p><strong>Get in Touch:</strong> mentesnotassefa0@gmail.com</p>
       <p><strong>Developed By:</strong> Mentesnot Assefa</p>
+      <p className="animate-pulse text-blue-900 dark:text-gray-300">ALX AFRICA Capstone Project</p>
+      <p className="animate-pulse text-red-900 dark:text-gray-300">April 2025</p>
         
       </p>
       
