@@ -90,7 +90,7 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
 
         // Save the quiz history to the backend
         try {
-          await axios.post(`${API_BASE_URL}/QuizHistory/history`, {
+          await axios.post(`${API_BASE_URL}/QuizResult/history`, {
             category: quizConfig.category,
             score: finalScore,
             questions: finalQuizSummary.questions,
