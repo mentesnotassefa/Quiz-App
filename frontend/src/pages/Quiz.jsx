@@ -32,7 +32,7 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
 
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/quizzes/questions`, {
+        const response = await axios.get(`${API_BASE_URL}/QuizHistory/questions`, {
           params: {
             amount: quizConfig.amount,
             category: quizConfig.category,
@@ -90,7 +90,7 @@ function Quiz({ quizConfig, score, setScore, setQuizSummary }) {
 
         // Save the quiz history to the backend
         try {
-          await axios.post(`${API_BASE_URL}/quizzes/history`, {
+          await axios.post(`${API_BASE_URL}/QuizHistory/history`, {
             category: quizConfig.category,
             score: finalScore,
             questions: finalQuizSummary.questions,

@@ -1,6 +1,7 @@
 // controllers/quizController.js
 // This file contains the logic for handling quiz results.
 
+const QuizHistory = require('../models/QuizResult');
 const QuizResult = require('../models/QuizResult');
 
 // @desc    Submit a new quiz result
@@ -12,7 +13,7 @@ exports.submitQuiz = async (req, res) => {
 
   try {
     // Create a new quiz result instance
-    const newQuizResult = new QuizResult({
+    const newQuizResult = new QuizHistory({
       user: userId,
       score,
     });

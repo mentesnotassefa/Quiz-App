@@ -1,6 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const QuizHistory = require("../models/QuizHistory");
+const QuizHistory = require("../models/QuizResult");
 const auth = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -74,7 +74,7 @@ router.get("/questions", async (req, res) => {
   }
 });
 
-// @route POST /api/quizzes/history
+// @route POST /api/QuizHistory/history
 // @desc Save a completed quiz to history
 router.post("/history", auth, async (req, res) => {
   const { category, score, questions } = req.body;
@@ -93,7 +93,7 @@ router.post("/history", auth, async (req, res) => {
   }
 });
 
-// @route GET /api/quizzes/history
+// @route GET /api/QuizHistory/history
 // @desc Get all quiz history for the authenticated user
 router.get("/history", auth, async (req, res) => {
   try {
