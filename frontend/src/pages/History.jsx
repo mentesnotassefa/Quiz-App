@@ -21,7 +21,7 @@ function History() {
 
     const fetchHistory = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/QuizResult/history`);
+        const response = await axios.get(`${API_BASE_URL}/QuizHistory/history`);
         setQuizHistory(response.data);
         setLoading(false);
       } catch (err) {
