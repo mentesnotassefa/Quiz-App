@@ -1,92 +1,61 @@
-import { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Category({ setQuizConfig }) {
-  const [selectedCategory, setSelectedCategory] = useState("General Knowledge");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("easy");
-  const [amount, setAmount] = useState(10);
+function Category() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext);
-
-  const categories = [
-    "General Knowledge", "History", "Science", "Biology", "Chemistry",
-    "Physics", "Mathematics", "Social Science", "Computer", "Politics",
-    "Music", "Art", "Sport", "Vehicles", "Books", "Geography",
-    "Comics", "Film"
-  ];
-
-  const difficulties = ["easy", "medium", "hard"];
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
 
   const handleStartQuiz = () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-    setQuizConfig({
-      category: selectedCategory,
-      amount: parseInt(amount),
-      difficulty: selectedDifficulty,
-    });
-    navigate("/quiz");
+    // Navigate to the Quiz page with state
+    navigate('/quiz', { state: { category: selectedCategory, difficulty: selectedDifficulty } });
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 dark:bg-gray-900">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Choose Your Quiz</h2>
-      <div className="space-y-6">
-        <div>
-          <label className="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Category:</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`p-3 rounded-lg border-2 ${
-                  selectedCategory === cat
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-screen pt-20 bg-gray-100 p-8">
+      <div className="p-8 rounded-lg bg-white shadow-lg w-full max-w-lg text-center space-y-6">
+        <h1 className="text-3xl font-bold text-gray-800">Select Quiz Options</h1>
+        <div className="flex flex-col space-y-4">
+          <label className="text-lg font-semibold">
+            Select Category:
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="ml-4 p-2 rounded-md border border-gray-300 w-full mt-2"
+            >
+              <option value="">Any Category</option>
+              <option value="General Knowledge">General Knowledge</option>
+              <option value="Books">Books</option>
+              <option value="Film">Film</option>
+              <option value="Music">Music</option>
+              <option value="Science">Science</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="History">History</option>
+              <option value="Politics">Politics</option>
+              <option value="Art">Art</option>
+              <option value="Sports">Sports</option>
+              <option value="Geography">Geography</option>
+              <option value="Comics">Comics</option>
+              <option value="Vehicles">Vehicles</option>
+            </select>
+          </label>
+          <label className="text-lg font-semibold">
+            Select Difficulty:
+            <select
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="ml-4 p-2 rounded-md border border-gray-300 w-full mt-2"
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
         </div>
-        <div>
-          <label className="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Difficulty:</label>
-          <div className="flex space-x-4">
-            {difficulties.map((diff) => (
-              <button
-                key={diff}
-                onClick={() => setSelectedDifficulty(diff)}
-                className={`p-3 rounded-lg border-2 w-full ${
-                  selectedDifficulty === diff
-                    ? "bg-green-600 text-white border-green-600"
-                    : "bg-white border-gray-300 text-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
-                }`}
-              >
-                {diff.charAt(0).toUpperCase() + diff.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className="block text-lg font-medium mb-2 text-gray-900 dark:text-white">Number of Questions:</label>
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            min="1"
-            max="50"
-            className="w-full p-3 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
-        </div>
-      </div>
-      <div className="mt-8 flex justify-center">
         <button
+          className="bg-blue-600 text-white p-3 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200 w-full"
           onClick={handleStartQuiz}
-          className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-500 dark:hover:bg-gray-900"
         >
           Start Quiz
         </button>

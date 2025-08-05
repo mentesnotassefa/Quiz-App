@@ -1,78 +1,70 @@
-import { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import AuthContext from "../context/AuthContext";
-
-const API_BASE_URL = "http://localhost:5000/api";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function History() {
-  const [quizHistory, setQuizHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { token } = useContext(AuthContext);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Redirect if not authenticated
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+  // Get token from localStorage
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
 
-    const fetchHistory = async () => { 
+  const getHeaders = () => {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  // Fetch quiz history on component mount
+  useEffect(() => {
+    const fetchHistory = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/QuizHistory/history`);
-        setQuizHistory(response.data);
-        setLoading(false);
+        setLoading(true);
+        const headers = getHeaders();
+        if (!headers.Authorization) {
+          setError("Please log in to view your quiz history.");
+          setLoading(false);
+          return;
+        }
+        const response = await axios.get('http://localhost:5000/api/quizzes/history', { headers });
+        setHistory(response.data);
       } catch (err) {
-        console.error("Error fetching history:", err);
-        setError("Failed to fetch quiz history.");
+        console.error("Failed to fetch quiz history:", err.response?.status, err.response?.data?.message || err.message);
+        setError("Failed to fetch quiz history. Please log in again.");
+      } finally {
         setLoading(false);
       }
     };
     fetchHistory();
-  }, [token, navigate]);
-
-  if (loading) {
-    return <div className="text-center p-4 dark:text-white">Loading history...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center p-4 text-red-600 dark:text-red-400">{error}</div>;
-  }
+  }, []);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 dark:bg-gray-900">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Your Quiz History</h2>
-
-      {quizHistory.length > 0 ? (
-        <ul className="space-y-4">
-          {quizHistory.map((quiz, idx) => (
-            <li key={idx} className="bg-white p-4 rounded-lg shadow dark:bg-gray-800 dark:text-gray-100">
-              <p className="text-lg">
-                <strong>Category:</strong> {quiz.category}
-              </p>
-              <p className="text-lg">
-                <strong>Score:</strong> {quiz.score}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                <strong>Date:</strong> {new Date(quiz.date).toLocaleString()}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-lg text-gray-600 dark:text-gray-400">
-          You have no quiz history yet. Take a quiz to see your results here!
-        </p>
-      )}
-
-      <Link
-        to="/"
-        className="mt-6 inline-block bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-500 dark:hover:bg-gray-600"
-      >
-        Back to Home
-      </Link>
+    <div className="min-h-screen bg-gray-100 p-8 pt-20">
+      <div className="mt-8 w-full max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4 text-center">Quiz History</h1>
+        {loading ? (
+          <p className="text-center">Loading history...</p>
+        ) : (
+          <ul className="space-y-4">
+            {history.length > 0 ? (
+              history.map((h) => (
+                <li key={h._id} className="p-4 rounded-lg bg-white shadow-md flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-xl">{h.category}</p>
+                    <p className="text-sm text-gray-500">{new Date(h.date).toLocaleDateString()}</p>
+                  </div>
+                  <p className="text-lg font-semibold">{`Score: ${h.score} / ${h.questions.length}`}</p>
+                </li>
+              ))
+            ) : (
+              <p className="text-center">{error || "No quiz history found. Take a quiz to get started!"}</p>
+            )}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

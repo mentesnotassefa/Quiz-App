@@ -1,78 +1,75 @@
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-/**
- * Result component to display the final quiz score and a summary of answers.
- * @param {object} props - Component props.
- * @param {number} props.score - The final score of the quiz.
- * @param {object} props.quizSummary - An object containing the summary of the quiz, including all questions and answers.
- * @param {function} props.resetQuiz - Function to reset the quiz state and navigate back to the home page.
- */
-function Result({ score, quizSummary, resetQuiz }) {
-  // Filter the questions into two lists based on correctness
-  const correctQuestions = quizSummary.questions.filter((q) => q.isCorrect);
-  const incorrectQuestions = quizSummary.questions.filter((q) => !q.isCorrect);
+function Result() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { quizResult } = location.state || {};
+  const [historySaved, setHistorySaved] = useState(false);
+  const [error, setError] = useState('');
+
+  // Get token from localStorage
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
+  const saveQuizHistory = async () => {
+    const token = getToken();
+    if (!token) {
+      console.error("No token found. Cannot save quiz history.");
+      setError("You must be logged in to save your history.");
+      return;
+    }
+    
+    try {
+      await axios.post('http://localhost:5000/api/quizzes/history', quizResult, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log("Quiz history saved successfully.");
+      setHistorySaved(true);
+    } catch (err) {
+      console.error("Failed to save quiz history:", err.response?.status, err.response?.data?.message || err.message);
+      setError("Failed to save quiz history. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    if (quizResult && !historySaved) {
+      saveQuizHistory();
+    }
+  }, [quizResult, historySaved]);
+
+  if (!quizResult) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen pt-20 bg-gray-100">
+        <p className="text-2xl text-red-500">No quiz result found. Please take a quiz first.</p>
+        <button
+          onClick={() => navigate('/category')}
+          className="mt-4 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
+        >
+          Go to Quiz
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 text-center dark:bg-gray-900">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Quiz Completed!</h2>
-      <p className="text-xl mb-2 text-gray-900 dark:text-white">Your Final Score: {score}</p>
-      <p className="text-lg mb-6 text-gray-700 dark:text-gray-300">
-        Summary: Correct: {quizSummary.correct}, Incorrect: {quizSummary.incorrect}
-      </p>
+    <div className="flex flex-col items-center justify-center min-h-screen pt-20 bg-gray-100">
+      <div className="p-8 rounded-lg bg-white shadow-lg w-full max-w-lg text-center space-y-4">
+        <h1 className="text-3xl font-bold text-green-600">Quiz Finished!</h1>
+        <p className="text-xl text-gray-700">Category: <span className="font-semibold">{quizResult.category}</span></p>
+        <p className="text-2xl font-bold text-gray-800">Your Score: <span className="text-4xl text-blue-600">{quizResult.score}</span> / {quizResult.questions.length}</p>
+        
+        {error && <p className="text-red-500">{error}</p>}
+        {historySaved && <p className="text-green-600">Quiz history has been saved!</p>}
 
-      {/* Display a list of all correct answers */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2 text-green-600 dark:text-green-400">Correct Answers</h3>
-        {correctQuestions.length > 0 ? (
-          <ul className="space-y-2 text-left">
-            {correctQuestions.map((q, idx) => (
-              <li
-                key={idx}
-                className="bg-green-100 p-2 rounded dark:bg-green-800 dark:text-green-100"
-                dangerouslySetInnerHTML={{ __html: q.question }}
-              />
-            ))}
-          </ul>
-        ) : (
-          <p className="text-lg text-gray-600 dark:text-gray-400">No correct answers.</p>
-        )}
-      </div>
-
-      {/* Display a list of all incorrect answers, showing the user's answer and the correct one */}
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2 text-red-600 dark:text-red-400">Incorrect Answers</h3>
-        {incorrectQuestions.length > 0 ? (
-          <ul className="space-y-2 text-left">
-            {incorrectQuestions.map((q, idx) => (
-              <li key={idx} className="bg-red-100 p-2 rounded dark:bg-red-800 dark:text-red-100">
-                <span dangerouslySetInnerHTML={{ __html: q.question }} />{" "}
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  (You answered: "<span dangerouslySetInnerHTML={{ __html: q.userAnswer }} />", Correct: "
-                  <span dangerouslySetInnerHTML={{ __html: q.correctAnswer }} />")
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-lg text-gray-600 dark:text-gray-400">No incorrect answers.</p>
-        )}
-      </div>
-
-      {/* Navigation buttons */}
-      <div className="space-x-4">
-        <Link
-          to="/"
-          onClick={resetQuiz}
-          className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-900 dark:bg-gray-500 dark:hover:bg-gray-900"
+        <button
+          onClick={() => navigate('/category')}
+          className="mt-6 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
         >
-          Restart Quiz
-        </Link>
-        <Link
-          to="/history"
-          className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600"
-        >
-          View History
-        </Link>
+          Take Another Quiz
+        </button>
       </div>
     </div>
   );
