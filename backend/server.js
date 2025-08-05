@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
-const quizRoutes = require("./routes/QuizHistory");
+const quizRoutes = require("./routes/quizzes");
 
 dotenv.config();
 
@@ -21,7 +21,6 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Routes
-// Simple health check route for the root URL
 app.get("/", (req, res) => {
   res.send("Server is running!");
 });
@@ -30,7 +29,7 @@ try {
   console.log("Loading routes...");
   app.use("/api/auth", authRoutes);
   console.log("Auth routes loaded successfully.");
-  app.use("/api/QuizHistory", quizRoutes);
+  app.use("/api/quizzes", quizRoutes);
   console.log("Quiz routes loaded successfully.");
 } catch (error) {
   console.error("Error loading routes:", error);

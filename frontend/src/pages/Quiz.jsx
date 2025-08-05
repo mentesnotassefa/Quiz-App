@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 
 function Quiz() {
   const navigate = useNavigate();
@@ -31,6 +30,7 @@ function Quiz() {
 
   const getHeaders = () => {
     const token = getToken();
+    console.log("Token retrieved from localStorage:", token ? 'Found' : 'Not Found');
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
@@ -42,15 +42,16 @@ function Quiz() {
         const headers = getHeaders();
         if (!headers.Authorization) {
           console.log("No authorization token found. Cannot fetch history.");
-          // You might want to display a message to the user here
+          setError("Please log in to view your quiz history.");
           setLoading(false);
           return;
         }
-        const response = await axios.get('http://localhost:5000/api/QuizResult/history', { headers });
+        const response = await axios.get('http://localhost:5000/api/quizzes/history', { headers });
+        console.log("Quiz history fetched successfully:", response.data);
         setHistory(response.data);
       } catch (err) {
-        console.error("Failed to fetch quiz history:", err);
-        setError("Failed to fetch quiz history.");
+        console.error("Failed to fetch quiz history:", err.response?.status, err.response?.data?.message || err.message);
+        setError("Failed to fetch quiz history. Please log in again.");
       } finally {
         setLoading(false);
       }
@@ -62,7 +63,7 @@ function Quiz() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:5000/api/QuizHistory/questions`, {
+      const response = await axios.get(`http://localhost:5000/api/quizzes/questions`, {
         params: {
           amount: 10,
           category: selectedCategory,
@@ -115,18 +116,18 @@ function Quiz() {
     }
     
     try {
-      await axios.post('http://localhost:5000/api/QuizHistory/history', {
+      await axios.post('http://localhost:5000/api/quizzes/history', {
         category: selectedCategory,
         score,
         questions: questions,
       }, { headers: { Authorization: `Bearer ${token}` } });
       
       // Update history state to show new quiz
-      const response = await axios.get('http://localhost:5000/api/QuizHistory/history', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('http://localhost:5000/api/quizzes/history', { headers: { Authorization: `Bearer ${token}` } });
       setHistory(response.data);
 
     } catch (err) {
-      console.error("Failed to save quiz history:", err.response ? err.response.data.message : err.message);
+      console.error("Failed to save quiz history:", err.response?.status, err.response?.data?.message || err.message);
     }
   };
 
@@ -140,7 +141,6 @@ function Quiz() {
     if (!currentQuestion) return null;
 
     const answers = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
-    // Shuffle the answers to make the quiz more dynamic
     answers.sort(() => Math.random() - 0.5);
 
     return (
@@ -273,7 +273,7 @@ function Quiz() {
                 </li>
               ))
             ) : (
-              <p>No quiz history found. Take a quiz to get started!</p>
+              <p>{error || "No quiz history found. Take a quiz to get started!"}</p>
             )}
           </ul>
         )}

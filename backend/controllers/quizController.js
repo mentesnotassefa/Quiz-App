@@ -1,8 +1,7 @@
 const axios = require("axios");
-const QuizResult = require("../models/QuizResult");
+const QuizHistory = require("../models/QuizHistory");
 
 // Map friendly category names to OpenTDB category IDs.
-// The keys are now all lowercase to handle case-insensitivity from the frontend.
 const categoryMap = {
   "general knowledge": 9,
   "books": 10,
@@ -30,14 +29,10 @@ const categoryMap = {
  */
 const fetchQuestions = async (req, res) => {
   const { amount = 10, category, difficulty = "easy" } = req.query;
-
-  // Handle case-insensitivity for category names
   const lowercaseCategory = category.toLowerCase();
   const categoryId = categoryMap[lowercaseCategory];
 
   console.log("Fetching quiz questions with parameters:", { amount, category, difficulty });
-  console.log("Normalized category name:", lowercaseCategory);
-  console.log("Mapped category ID:", categoryId);
 
   if (!categoryId) {
     return res.status(400).json({ message: `Invalid category: "${category}". Please ensure it's a valid category from your list.` });
@@ -110,6 +105,7 @@ const getHistory = async (req, res) => {
     res.json(history);
   } catch (err) {
     console.error("Error fetching quiz history:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
