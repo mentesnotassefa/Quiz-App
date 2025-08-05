@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Quiz() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { category, difficulty, amount } = location.state || {};
+  
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState('');
-  const [quizStarted, setQuizStarted] = useState(false);
-  const [quizFinished, setQuizFinished] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('easy');
 
   // Utility function to decode HTML entities
   const decodeHtml = (html) => {
@@ -23,261 +22,145 @@ function Quiz() {
     return txt.value;
   };
 
-  // Get token from localStorage
-  const getToken = () => {
-    return localStorage.getItem('token');
-  };
-
-  const getHeaders = () => {
-    const token = getToken();
-    console.log("Token retrieved from localStorage:", token ? 'Found' : 'Not Found');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  // Fetch quiz history on component mount or when user logs in
   useEffect(() => {
-    const fetchHistory = async () => {
+    if (!category || !amount) {
+      setError("Please select a category, difficulty, and number of questions to start a quiz.");
+      // Redirect back to category page if no state is present
+      navigate('/category');
+      return;
+    }
+
+    const fetchQuestions = async () => {
+      setLoading(true);
+      setError('');
       try {
-        setLoading(true);
-        const headers = getHeaders();
-        if (!headers.Authorization) {
-          console.log("No authorization token found. Cannot fetch history.");
-          setError("Please log in to view your quiz history.");
-          setLoading(false);
-          return;
-        }
-        const response = await axios.get('http://localhost:5000/api/quizzes/history', { headers });
-        console.log("Quiz history fetched successfully:", response.data);
-        setHistory(response.data);
+        const response = await axios.get(`http://localhost:5000/api/quizzes/questions`, {
+          params: {
+            amount: amount,
+            category: category,
+            difficulty: difficulty,
+          },
+        });
+
+        const decodedQuestions = response.data.map(q => ({
+          ...q,
+          question: decodeHtml(q.question),
+          correct_answer: decodeHtml(q.correct_answer),
+          incorrect_answers: q.incorrect_answers.map(ans => decodeHtml(ans)),
+          // Combine and shuffle all answers for the quiz
+          all_answers: [...q.incorrect_answers.map(ans => decodeHtml(ans)), decodeHtml(q.correct_answer)].sort(() => Math.random() - 0.5),
+        }));
+
+        setQuestions(decodedQuestions);
       } catch (err) {
-        console.error("Failed to fetch quiz history:", err.response?.status, err.response?.data?.message || err.message);
-        setError("Failed to fetch quiz history. Please log in again.");
+        console.error("Error fetching questions:", err.response ? err.response.data.message : err.message);
+        setError(err.response ? err.response.data.message : 'Error fetching questions. Please try again.');
       } finally {
         setLoading(false);
       }
     };
-    fetchHistory();
-  }, []);
+    fetchQuestions();
+  }, [category, difficulty, amount, navigate]);
 
-  const startQuiz = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await axios.get(`http://localhost:5000/api/quizzes/questions`, {
-        params: {
-          amount: 10,
-          category: selectedCategory,
-          difficulty: selectedDifficulty,
-        },
-      });
-
-      const decodedQuestions = response.data.map(q => ({
-        ...q,
-        question: decodeHtml(q.question),
-        correct_answer: decodeHtml(q.correct_answer),
-        incorrect_answers: q.incorrect_answers.map(ans => decodeHtml(ans)),
-      }));
-
-      setQuestions(decodedQuestions);
-      setQuizStarted(true);
-      setQuizFinished(false);
-      setScore(0);
-      setCurrentQuestionIndex(0);
-    } catch (err) {
-      console.error("Error starting quiz:", err.response ? err.response.data.message : err.message);
-      setError(err.response ? err.response.data.message : 'Error starting quiz. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  const handleAnswerSelect = (answer) => {
+    if (showResults) return; // Prevent changing selection after results are shown
+    setSelectedAnswer(answer);
   };
 
   const checkAnswer = () => {
     if (!selectedAnswer) return;
 
+    setShowResults(true); // Show results
     const currentQuestion = questions[currentQuestionIndex];
     if (selectedAnswer === currentQuestion.correct_answer) {
       setScore(score + 1);
     }
-
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer('');
-    } else {
-      finishQuiz();
-    }
+    
+    // Move to the next question after a short delay
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setSelectedAnswer(null);
+        setShowResults(false);
+      } else {
+        finishQuiz();
+      }
+    }, 2000); // 2-second delay
   };
 
   const finishQuiz = async () => {
-    setQuizFinished(true);
-    const token = getToken();
-    if (!token) {
-      console.error("No token found. Cannot save quiz history.");
-      return;
-    }
-    
-    try {
-      await axios.post('http://localhost:5000/api/quizzes/history', {
-        category: selectedCategory,
-        score,
-        questions: questions,
-      }, { headers: { Authorization: `Bearer ${token}` } });
-      
-      // Update history state to show new quiz
-      const response = await axios.get('http://localhost:5000/api/quizzes/history', { headers: { Authorization: `Bearer ${token}` } });
-      setHistory(response.data);
-
-    } catch (err) {
-      console.error("Failed to save quiz history:", err.response?.status, err.response?.data?.message || err.message);
-    }
+    const quizResult = {
+      category: category,
+      score: score,
+      questions: questions,
+    };
+    navigate('/result', { state: { quizResult } });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const getButtonClass = (answer) => {
+    const baseClasses = "p-4 rounded-lg text-left font-semibold transition-colors duration-200 ease-in-out transform hover:scale-105";
+
+    if (!showResults) {
+      // Before results are shown
+      return `${baseClasses} ${selectedAnswer === answer ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300'}`;
+    } else {
+      // After results are shown
+      const currentQuestion = questions[currentQuestionIndex];
+      if (answer === currentQuestion.correct_answer) {
+        return `${baseClasses} bg-blue-600 text-white shadow-lg border-2 border-blue-800`;
+      } else if (answer === selectedAnswer) {
+        return `${baseClasses} bg-red-600 text-white shadow-lg border-2 border-red-800`;
+      } else {
+        return `${baseClasses} bg-gray-400 text-gray-800`;
+      }
+    }
   };
 
   const renderQuiz = () => {
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return null;
 
-    const answers = [...currentQuestion.incorrect_answers, currentQuestion.correct_answer];
-    answers.sort(() => Math.random() - 0.5);
-
     return (
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <h2 className="text-2xl font-bold">{`Question ${currentQuestionIndex + 1}/${questions.length}`}</h2>
-        <p className="text-xl">{currentQuestion.question}</p>
-        <div className="flex flex-col space-y-2">
-          {answers.map((answer, index) => (
+      <div className="p-8 rounded-xl bg-white shadow-xl w-full max-w-3xl text-center space-y-6">
+        <div className="flex justify-between items-center text-gray-600 text-lg font-bold">
+            <span className="bg-gray-200 px-4 py-1 rounded-full shadow-inner">Question {currentQuestionIndex + 1} / {questions.length}</span>
+            <span className="bg-gray-200 px-4 py-1 rounded-full shadow-inner">Score: {score}</span>
+        </div>
+        <h2 className="text-2xl font-extrabold text-gray-800 my-4">{currentQuestion.question}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          {currentQuestion.all_answers.map((answer, index) => (
             <button
               key={index}
-              className={`p-4 rounded-lg transition-colors duration-200 ${
-                selectedAnswer === answer
-                  ? 'bg-blue-500 text-white shadow-md'
-                  : 'bg-gray-200 hover:bg-gray-300'
-              }`}
-              onClick={() => setSelectedAnswer(answer)}
+              className={getButtonClass(answer)}
+              onClick={() => handleAnswerSelect(answer)}
+              disabled={showResults}
             >
               {answer}
             </button>
           ))}
         </div>
         <button
-          className="bg-green-500 text-white p-4 rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-400"
+          className="mt-6 bg-green-500 text-white p-4 rounded-lg shadow-md hover:bg-green-600 transition-colors duration-200 disabled:bg-gray-400 w-full md:w-auto"
           onClick={checkAnswer}
-          disabled={!selectedAnswer}
+          disabled={!selectedAnswer || showResults}
         >
-          {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+          {showResults ? "Next Question" : "Submit Answer"}
         </button>
       </div>
     );
   };
 
-  const renderQuizSetup = () => (
-    <div className="flex flex-col items-center justify-center space-y-4">
-      <h2 className="text-2xl font-bold">Start a New Quiz</h2>
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="flex flex-col space-y-2">
-        <label>
-          Select Category:
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="ml-2 p-2 rounded-md border"
-          >
-            <option value="">Any Category</option>
-            <option value="General Knowledge">General Knowledge</option>
-            <option value="Books">Books</option>
-            <option value="Film">Film</option>
-            <option value="Music">Music</option>
-            <option value="Science">Science</option>
-            <option value="Mathematics">Mathematics</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="History">History</option>
-            <option value="Politics">Politics</option>
-            <option value="Art">Art</option>
-            <option value="Sports">Sports</option>
-            <option value="Geography">Geography</option>
-            <option value="Comics">Comics</option>
-            <option value="Vehicles">Vehicles</option>
-          </select>
-        </label>
-        <label>
-          Select Difficulty:
-          <select
-            value={selectedDifficulty}
-            onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="ml-2 p-2 rounded-md border"
-          >
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </label>
-      </div>
-      <button
-        className="bg-blue-500 text-white p-4 rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400"
-        onClick={startQuiz}
-        disabled={loading}
-      >
-        {loading ? 'Loading...' : 'Start Quiz'}
-      </button>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-8">Quiz Application</h1>
-      <button
-        className="bg-red-500 text-white p-2 rounded-lg shadow-md hover:bg-red-600 transition-colors duration-200 absolute top-4 right-4"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
-
-      {quizFinished && (
-        <div className="text-center mb-8 p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl">
-          <h2 className="text-3xl font-bold text-green-600 mb-2">Quiz Finished!</h2>
-          <p className="text-2xl">Your Score: {score} / {questions.length}</p>
-          <button
-            className="mt-4 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
-            onClick={() => setQuizFinished(false)}
-          >
-            Take Another Quiz
-          </button>
-        </div>
-      )}
-
-      {!quizStarted ? (
-        renderQuizSetup()
+    <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center pt-20">
+      {loading ? (
+        <p className="text-3xl font-semibold text-gray-700">Loading questions...</p>
+      ) : error ? (
+        <p className="text-2xl text-red-500 p-6 rounded-lg bg-white shadow-lg">{error}</p>
+      ) : questions.length > 0 ? (
+        renderQuiz()
       ) : (
-        <div className="p-6 rounded-lg bg-white shadow-lg w-full max-w-2xl">
-          {renderQuiz()}
-        </div>
+        <p className="text-2xl p-6 rounded-lg bg-white shadow-lg text-gray-700">No questions found. Please try another category or number of questions.</p>
       )}
-
-      <div className="mt-8 w-full max-w-2xl">
-        <h2 className="text-3xl font-bold mb-4">Quiz History</h2>
-        {loading ? (
-          <p>Loading history...</p>
-        ) : (
-          <ul className="space-y-4">
-            {history.length > 0 ? (
-              history.map((h) => (
-                <li key={h._id} className="p-4 rounded-lg bg-white shadow-md flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-xl">{h.category}</p>
-                    <p className="text-sm text-gray-500">{new Date(h.date).toLocaleDateString()}</p>
-                  </div>
-                  <p className="text-lg font-semibold">{`Score: ${h.score} / ${h.questions.length}`}</p>
-                </li>
-              ))
-            ) : (
-              <p>{error || "No quiz history found. Take a quiz to get started!"}</p>
-            )}
-          </ul>
-        )}
-      </div>
     </div>
   );
 }

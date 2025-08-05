@@ -43,24 +43,24 @@ function History() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 pt-20">
-      <div className="mt-8 w-full max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-center">Quiz History</h1>
+      <div className="mt-8 w-full max-w-2xl mx-auto p-8 rounded-xl bg-white shadow-xl">
+        <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Quiz History</h1>
         {loading ? (
-          <p className="text-center">Loading history...</p>
+          <p className="text-center text-gray-500">Loading history...</p>
         ) : (
           <ul className="space-y-4">
             {history.length > 0 ? (
               history.map((h) => (
-                <li key={h._id} className="p-4 rounded-lg bg-white shadow-md flex justify-between items-center">
+                <li key={h._id} className="p-4 rounded-lg bg-gray-50 shadow-md flex justify-between items-center transition-transform duration-200 hover:scale-105">
                   <div>
-                    <p className="font-bold text-xl">{h.category}</p>
+                    <p className="font-bold text-xl text-gray-800">{h.category}</p>
                     <p className="text-sm text-gray-500">{new Date(h.date).toLocaleDateString()}</p>
                   </div>
-                  <p className="text-lg font-semibold">{`Score: ${h.score} / ${h.questions.length}`}</p>
+                  <p className="text-lg font-semibold text-blue-600">{`Score: ${h.score} / ${h.questions.length}`}</p>
                 </li>
               ))
             ) : (
-              <p className="text-center">{error || "No quiz history found. Take a quiz to get started!"}</p>
+              <p className="text-center text-gray-500">{error || "No quiz history found. Take a quiz to get started!"}</p>
             )}
           </ul>
         )}

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import all your components
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -11,71 +12,48 @@ import History from "./pages/History";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+const isAuthenticated = () => {
+  return localStorage.getItem('token');
+};
+
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [quizConfig, setQuizConfig] = useState({
-    category: "",
-    amount: 10,
-    difficulty: "easy",
-  });
-  const [score, setScore] = useState(0);
-  const [quizSummary, setQuizSummary] = useState(null);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  const resetQuiz = () => {
-    setScore(0);
-    setQuizSummary(null);
-    setQuizConfig({ category: "", amount: 10, difficulty: "easy" });
-  };
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem("isDarkMode");
-    if (savedMode !== null) {
-      setIsDarkMode(JSON.parse(savedMode));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("isDarkMode", JSON.stringify(isDarkMode));
-    document.body.className = isDarkMode ? "dark" : "";
-  }, [isDarkMode]);
-
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
-          <Navbar toggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
-          <main className="container mx-auto mt-4">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/category" element={<Category setQuizConfig={setQuizConfig} />} />
-              <Route
-                path="/quiz"
-                element={
-                  <Quiz
-                    quizConfig={quizConfig}
-                    score={score}
-                    setScore={setScore}
-                    setQuizSummary={setQuizSummary}
-                  />
-                }
-              />
-              <Route
-                path="/result"
-                element={<Result score={score} quizSummary={quizSummary} resetQuiz={resetQuiz} />}
-              />
-              <Route path="/history" element={<History />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Routes>
-          </main>
-        </div>
-      </AuthProvider>
-    </BrowserRouter>
+    <Router>
+      <Navbar /> {/* The Navbar will be visible on all pages */}
+      <main className="pt-20"> {/* Add top padding to prevent content from being hidden behind the fixed navbar */}
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+
+          {/* Protected Routes - Only accessible when authenticated */}
+          <Route
+            path="/"
+            element={isAuthenticated() ? <Home /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/category"
+            element={isAuthenticated() ? <Category /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/quiz"
+            element={isAuthenticated() ? <Quiz /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/result"
+            element={isAuthenticated() ? <Result /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/history"
+            element={isAuthenticated() ? <History /> : <Navigate to="/login" />}
+          />
+
+          {/* Fallback for unknown routes */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
+    </Router>
   );
 }
 

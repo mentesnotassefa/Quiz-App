@@ -13,16 +13,16 @@ function Navbar() {
   return (
     <nav className="bg-white shadow-md py-4 px-8 flex justify-between items-center fixed top-0 left-0 w-full z-10">
       <div className="flex space-x-6">
-        <Link to="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+        <Link to="/" className="text-xl font-bold text-gray-700 hover:text-blue-600 transition-colors duration-200">
           Home
         </Link>
-        <Link to="/category" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+        <Link to="/category" className="text-xl font-bold text-gray-700 hover:text-blue-600 transition-colors duration-200">
           Quiz
         </Link>
-        <Link to="/history" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+        <Link to="/history" className="text-xl font-bold text-gray-700 hover:text-blue-600 transition-colors duration-200">
           History
         </Link>
-        <Link to="/about" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+        <Link to="/about" className="text-xl font-bold text-gray-700 hover:text-blue-600 transition-colors duration-200">
           About
         </Link>
       </div>
